@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  server:
+    build: { dockerfile: Dockerfile.server }
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://port69:port69@db:5432/port69
+      SECRET_KEY: ${SECRET_KEY:-change-this-in-production}
+      HOST: 0.0.0.0
+      PORT: 8000
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: port69
+      POSTGRES_PASSWORD: port69
+      POSTGRES_DB: port69
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U port69"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports: ["5432:5432"]
+
+volumes:
+  pgdata:
+  uploads:
